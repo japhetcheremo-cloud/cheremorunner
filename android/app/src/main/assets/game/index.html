@@ -308,6 +308,10 @@
     </style>
 </head>
 <body>
+
+    <!-- Floating Admin Access Gear (Visible on all screens) -->
+    <div id="floating-admin-btn" style="position: fixed; top: 16px; right: 16px; z-index: 99999; background: #dc2626; color: #fff; border: 2px solid #fecaca; padding: 7px 16px; border-radius: 24px; font-size: 13px; font-weight: 900; letter-spacing: 1px; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 14px rgba(220,38,38,0.6);" onclick="openAdminConsole()" ontouchend="openAdminConsole()">⚙️ ADMIN</div>
+
     <canvas id="canvas3d"></canvas>
 
     <!-- Gameplay HUD -->
@@ -350,6 +354,7 @@
             <button class="btn btn-secondary" onclick="openScreen('shop')">SHOP</button>
             <button class="btn btn-secondary" onclick="openScreen('achievements')">ACHIEVEMENTS</button>
             <button class="btn btn-secondary" onclick="openScreen('settings')">SETTINGS</button>
+            <button class="btn" style="background: linear-gradient(135deg, #b91c1c, #7f1d1d); border-color: #f87171; color: #fff; margin-top: 10px;" onclick="openAdminConsole()" ontouchend="openAdminConsole()">⚙️ ADMIN DASHBOARD</button>
         </div>
 
         <!-- 3. Character Selection -->
@@ -1419,16 +1424,23 @@
         });
 
         function openAdminConsole() {
-            Sound.powerup();
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-admin').classList.add('active');
-            document.getElementById('admin-god-status').innerText = adminGodMode ? 'ON (ACTIVE)' : 'OFF';
-            document.getElementById('admin-god-status').style.color = adminGodMode ? '#10b981' : '#ef4444';
+            try { Sound.powerup(); } catch(e) {}
+            const panel = document.getElementById('screen-admin');
+            panel.style.display = 'flex';
+            panel.style.zIndex = '999999';
+            panel.classList.add('active');
+            const statusEl = document.getElementById('admin-god-status');
+            if (statusEl) {
+                statusEl.innerText = adminGodMode ? 'ON (ACTIVE)' : 'OFF';
+                statusEl.style.color = adminGodMode ? '#10b981' : '#ef4444';
+            }
         }
 
         function closeAdminConsole() {
-            Sound.click();
-            document.getElementById('screen-admin').classList.remove('active');
+            try { Sound.click(); } catch(e) {}
+            const panel = document.getElementById('screen-admin');
+            panel.style.display = 'none';
+            panel.classList.remove('active');
             if (isPlaying && !isDead) {
                 document.getElementById('screen-hud').classList.add('active');
             } else {
