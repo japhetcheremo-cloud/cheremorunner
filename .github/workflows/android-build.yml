@@ -1,0 +1,116 @@
+name: Android APK Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Android-
+            Library-
+
+      - name: Build Android APK via GameCI
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          targetPlatform: Android
+          buildMethod: CheremoRunner.Editor.CheremoBuildScript.BuildAndroid
+          customParameters: -profile -quit
+          buildName: CHEREMO-RUNNER
+
+      - name: Locate and Rename APK
+        run: |
+          mkdir -p release_output
+          FOUND_APK=$(find build/ -name "*.apk" -o -name "CHEREMO-RUNNER.apk" | head -n 1)
+          if [ -z "$FOUND_APK" ]; then
+            FOUND_APK=$(find . -name "*.apk" | head -n 1)
+          fi
+          if [ -n "$FOUND_APK" ] && [ -s "$FOUND_APK" ]; then
+            echo "Found APK at $FOUND_APK"
+            cp "$FOUND_APK" release_output/CHEREMO-RUNNER.apk
+            ls -lh release_output/CHEREMO-RUNNER.apk
+          else
+            echo "::error::APK file was not generated or is empty."
+            exit 1
+          fi
+
+      - name: Verify APK Integrity
+        run: |
+          if [ ! -s release_output/CHEREMO-RUNNER.apk ]; then
+            echo "::error::Verified failed: release_output/CHEREMO-RUNNER.apk does not exist or has zero bytes."
+            exit 1
+          fi
+          echo "APK successfully verified!"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CHEREMO-RUNNER-APK
+          path: release_output/CHEREMO-RUNNER.apk
+          retention-days: 14
+
+      - name: Create GitHub Release and Attach APK
+        uses: softprops/action-gh-release@v2
+        if: success()
+        with:
+          tag_name: ${{ github.event.inputs.release_tag || 'v1.0.0' }}
+          name: "CHEREMO RUNNER v1.0.0 — Official Android Release"
+          body: |
+            # 🏃 CHEREMO RUNNER — Android Mobile Game v1.0.0
+            
+            **Tagline:** RUN. DODGE. COLLECT. CONQUER.  
+            **Developer:** CHEREMO  
+            **Target Platform:** Android (Portrait)
+            
+            ---
+            
+            ### 🎮 Features in this Release:
+            - **Endless 3D City Track**: Dynamic skyline, procedurally generated roads, sidewalks, obstacles, and lighting.
+            - **Intuitive Touch Controls**: Smooth 3-lane switching (swipe left/right), leaping (swipe up), and sliding (swipe down).
+            - **Collectible Coins & Powerups**: Coin Magnet, Energy Shield, and 2X Score Multiplier.
+            - **4 Unlockable Runner Skins**: Cheremo Classic, Cyber Phantom, Gold Rush, and Urban Shadow.
+            - **Upgrade Shop & Economy**: Level up powerups and unlock character skins with collected coins.
+            - **Achievements & Settings**: Track runner milestones, toggle BGM/SFX, haptic vibration, and graphic quality presets.
+            - **Full Offline Play**: 100% offline local persistence for scores, coins, and unlocks.
+            
+            ---
+            
+            ### 📲 How to Install on Android:
+            1. Download `CHEREMO-RUNNER.apk` below.
+            2. Open the downloaded file on your Android device.
+            3. If prompted, allow installation from this source.
+            4. Tap **Install** and launch **CHEREMO RUNNER**!
+          files: release_output/CHEREMO-RUNNER.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

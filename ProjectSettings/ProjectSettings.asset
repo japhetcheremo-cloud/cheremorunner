@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productGUID: 49b7241e3a9c402bb68a88cb15d18d40
+  AndroidProfiler: 0
+  defaultScreenOrientation: 1
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: CHEREMO
+  productName: CHEREMO RUNNER
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0.043, g: 0.074, b: 0.168, a: 1}
+  m_ShowUnitySplashScreen: 1
+  m_ShowUnitySplashLogo: 0
+  m_SplashScreenOverlayOpacity: 1
+  m_SplashScreenAnimation: 1
+  m_SplashScreenLogoStyle: 1
+  m_SplashScreenDrawMode: 0
+  m_SplashScreenBackgroundAnimation: 1
+  m_SplashScreenLogoAnimation: 1
+  bundleVersion: 1.0.0
+  bundleVersionCode: 1
+  applicationIdentifier:
+    Android: com.cheremo.runner
+    Standalone: com.cheremo.runner
+  defaultScreenWidth: 1080
+  defaultScreenHeight: 1920
+  defaultScreenWidthWeb: 1080
+  defaultScreenHeightWeb: 1920
+  m_AndroidTargetArchitectures: 3
+  m_AndroidMinimumAPILevel: 24
+  m_AndroidTargetAPILevel: 34
+  m_BuildTargetGroup: 13
+  scriptingBackend:
+    Android: 0
+  stripEngineCode: 1
+  AndroidKeystoreName: 
+  AndroidKeyaliasName: 
