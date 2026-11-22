@@ -259,6 +259,52 @@
             box-shadow: 0 0 12px #00e5ff;
             transition: width 0.3s;
         }
+
+        .admin-banner {
+            background: linear-gradient(90deg, #dc2626, #991b1b);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .admin-btn {
+            background: #1e293b;
+            border: 1px solid #dc2626;
+            color: #fca5a5;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 0;
+            width: 90%;
+            max-width: 320px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-btn:active {
+            filter: brightness(1.3);
+            transform: scale(0.98);
+        }
+        .admin-toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc2626;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -283,7 +329,7 @@
     <div class="ui-layer">
         <!-- 1. Splash Screen -->
         <div id="screen-splash" class="screen active">
-            <div class="brand-logo">CHEREMO</div>
+            <div class="brand-logo" onclick="handleAdminLogoTap()">CHEREMO</div>
             <div class="brand-sub">RUNNER</div>
             <div class="tagline">RUN . DODGE . COLLECT . CONQUER</div>
             <div class="loading-bar"><div id="splash-fill" class="loading-fill"></div></div>
@@ -292,7 +338,7 @@
 
         <!-- 2. Main Menu -->
         <div id="screen-menu" class="screen">
-            <div class="brand-logo">CHEREMO</div>
+            <div class="brand-logo" onclick="handleAdminLogoTap()">CHEREMO</div>
             <div class="brand-sub">RUNNER</div>
             <div class="tagline">RUN . DODGE . COLLECT . CONQUER</div>
             <div class="stats-panel">
@@ -385,6 +431,37 @@
             <button class="btn btn-secondary" onclick="openScreen('menu')">MAIN MENU</button>
         </div>
 
+
+        <!-- 9. Admin Console Screen -->
+        <div id="screen-admin" class="screen">
+            <div class="admin-banner">CHEREMO DEVELOPER & ADMIN CONSOLE</div>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 14px;">Authorized access for CHEREMO Administrator</p>
+            <div id="admin-toast" class="admin-toast">Action Completed</div>
+
+            <button class="admin-btn" onclick="adminAddCoins(5000)">
+                <span>💰 Add 5,000 Coins</span><span style="color:#ffd700;">+5,000</span>
+            </button>
+            <button class="admin-btn" onclick="adminUnlockAllSkins()">
+                <span>🥋 Unlock All 4 Skins</span><span style="color:#10b981;">ALL SKINS</span>
+            </button>
+            <button class="admin-btn" onclick="adminToggleGodMode()">
+                <span>🛡️ God Mode (Invincible)</span><span id="admin-god-status" style="color:#ef4444;">OFF</span>
+            </button>
+            <button class="admin-btn" onclick="adminMaxUpgrades()">
+                <span>⚡ Max Powerup Upgrades</span><span style="color:#00e5ff;">LEVEL 5</span>
+            </button>
+            <button class="admin-btn" onclick="adminSetHighScore(25000)">
+                <span>🏆 Set High Score (25,000)</span><span style="color:#f59e0b;">25,000</span>
+            </button>
+            <button class="admin-btn" onclick="adminAllPowerupsNow()">
+                <span>🔥 Activate All Powerups (30s)</span><span style="color:#ec4899;">30s BOOST</span>
+            </button>
+            <button class="admin-btn" style="border-color: #ef4444; color: #f87171;" onclick="adminResetAll()">
+                <span>🧹 Wipe All Player Progress</span><span style="color:#ef4444;">RESET</span>
+            </button>
+
+            <button class="btn btn-secondary" style="margin-top: 18px; width: 85%;" onclick="closeAdminConsole()">CLOSE CONSOLE</button>
+        </div>
         <!-- 8. Game Over Screen -->
         <div id="screen-gameover" class="screen">
             <h2 style="color: #ef4444; font-size: 32px; margin-bottom: 4px;">RUN TERMINATED</h2>
@@ -1062,6 +1139,7 @@
         }
 
         function triggerCrash() {
+            if (adminGodMode) return;
             if (activePowerups.shield > 0) {
                 activePowerups.shield = 0;
                 document.getElementById('badge-shield').classList.remove('active');
@@ -1311,6 +1389,111 @@
                 setTimeout(() => openScreen('menu'), 400);
             }
         }, 300);
+
+        // ==========================================
+        // ADMIN & DEVELOPER OPERATING CONSOLE
+        // ==========================================
+        let adminGodMode = false;
+        let adminLogoTaps = 0;
+        let adminTapTimer = null;
+
+        function handleAdminLogoTap() {
+            adminLogoTaps++;
+            if (adminTapTimer) clearTimeout(adminTapTimer);
+            adminTapTimer = setTimeout(() => { adminLogoTaps = 0; }, 2500);
+
+            if (adminLogoTaps >= 5) {
+                adminLogoTaps = 0;
+                openAdminConsole();
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '`' || e.key === '~') {
+                if (document.getElementById('screen-admin').classList.contains('active')) {
+                    closeAdminConsole();
+                } else {
+                    openAdminConsole();
+                }
+            }
+        });
+
+        function openAdminConsole() {
+            Sound.powerup();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-admin').classList.add('active');
+            document.getElementById('admin-god-status').innerText = adminGodMode ? 'ON (ACTIVE)' : 'OFF';
+            document.getElementById('admin-god-status').style.color = adminGodMode ? '#10b981' : '#ef4444';
+        }
+
+        function closeAdminConsole() {
+            Sound.click();
+            document.getElementById('screen-admin').classList.remove('active');
+            if (isPlaying && !isDead) {
+                document.getElementById('screen-hud').classList.add('active');
+            } else {
+                openScreen('menu');
+            }
+        }
+
+        function showAdminNotice(text) {
+            const toast = document.getElementById('admin-toast');
+            toast.innerText = text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function adminAddCoins(amt) {
+            save.coins += amt;
+            saveStorage();
+            updateMenuStats();
+            Sound.coin();
+            showAdminNotice(`+${amt.toLocaleString()} COINS ADDED!`);
+        }
+
+        function adminUnlockAllSkins() {
+            save.unlockedSkins = [0, 1, 2, 3];
+            saveStorage();
+            Sound.powerup();
+            showAdminNotice('ALL 4 SKINS UNLOCKED!');
+        }
+
+        function adminToggleGodMode() {
+            adminGodMode = !adminGodMode;
+            document.getElementById('admin-god-status').innerText = adminGodMode ? 'ON (ACTIVE)' : 'OFF';
+            document.getElementById('admin-god-status').style.color = adminGodMode ? '#10b981' : '#ef4444';
+            Sound.click();
+            showAdminNotice(adminGodMode ? 'GOD MODE ENABLED!' : 'GOD MODE DISABLED');
+        }
+
+        function adminMaxUpgrades() {
+            save.levels = { magnet: 5, shield: 5, mult: 5 };
+            saveStorage();
+            Sound.powerup();
+            showAdminNotice('ALL POWERUPS SET TO MAX LEVEL 5!');
+        }
+
+        function adminSetHighScore(val) {
+            save.highScore = val;
+            saveStorage();
+            updateMenuStats();
+            Sound.powerup();
+            showAdminNotice(`HIGH SCORE SET TO ${val.toLocaleString()}!`);
+        }
+
+        function adminAllPowerupsNow() {
+            activePowerups = { magnet: 30, shield: 30, mult: 30 };
+            Sound.powerup();
+            showAdminNotice('ACTIVATED ALL POWERUPS FOR 30s!');
+        }
+
+        function adminResetAll() {
+            save = { highScore: 0, coins: 0, selectedSkin: 0, unlockedSkins: [0], levels: { magnet: 1, shield: 1, mult: 1 } };
+            saveStorage();
+            updateMenuStats();
+            Sound.crash();
+            showAdminNotice('ALL PROGRESS RESET TO ZERO');
+        }
     </script>
 </body>
 </html>
