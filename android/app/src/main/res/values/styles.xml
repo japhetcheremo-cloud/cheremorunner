@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.CheremoRunner" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/cyber_blue</item>
+        <item name="android:statusBarColor">@color/cyber_blue</item>
+        <item name="android:navigationBarColor">@color/cyber_blue</item>
+    </style>
+
+    <style name="Theme.CheremoRunner.Fullscreen" parent="Theme.CheremoRunner">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>
