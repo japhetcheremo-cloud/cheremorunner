@@ -309,8 +309,7 @@
 </head>
 <body>
 
-    <!-- Floating Admin Access Gear (Visible on all screens) -->
-    <div id="floating-admin-btn" style="position: fixed; top: 16px; right: 16px; z-index: 99999; background: #dc2626; color: #fff; border: 2px solid #fecaca; padding: 7px 16px; border-radius: 24px; font-size: 13px; font-weight: 900; letter-spacing: 1px; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 14px rgba(220,38,38,0.6);" onclick="openAdminConsole()" ontouchend="openAdminConsole()">⚙️ ADMIN</div>
+    
 
     <canvas id="canvas3d"></canvas>
 
@@ -333,7 +332,7 @@
     <div class="ui-layer">
         <!-- 1. Splash Screen -->
         <div id="screen-splash" class="screen active">
-            <div class="brand-logo" onclick="handleAdminLogoTap()">CHEREMO</div>
+            <div class="brand-logo" style="cursor:pointer; pointer-events:auto; -webkit-tap-highlight-color: transparent;" onclick="registerSecretAdminTap(event)" ontouchend="registerSecretAdminTap(event)">CHEREMO</div>
             <div class="brand-sub">RUNNER</div>
             <div class="tagline">RUN . DODGE . COLLECT . CONQUER</div>
             <div class="loading-bar"><div id="splash-fill" class="loading-fill"></div></div>
@@ -342,7 +341,7 @@
 
         <!-- 2. Main Menu -->
         <div id="screen-menu" class="screen">
-            <div class="brand-logo" onclick="handleAdminLogoTap()">CHEREMO</div>
+            <div class="brand-logo" style="cursor:pointer; pointer-events:auto; -webkit-tap-highlight-color: transparent;" onclick="registerSecretAdminTap(event)" ontouchend="registerSecretAdminTap(event)">CHEREMO</div>
             <div class="brand-sub">RUNNER</div>
             <div class="tagline">RUN . DODGE . COLLECT . CONQUER</div>
             <div class="stats-panel">
@@ -354,7 +353,7 @@
             <button class="btn btn-secondary" onclick="openScreen('shop')">SHOP</button>
             <button class="btn btn-secondary" onclick="openScreen('achievements')">ACHIEVEMENTS</button>
             <button class="btn btn-secondary" onclick="openScreen('settings')">SETTINGS</button>
-            <button class="btn" style="background: linear-gradient(135deg, #b91c1c, #7f1d1d); border-color: #f87171; color: #fff; margin-top: 10px;" onclick="openAdminConsole()" ontouchend="openAdminConsole()">⚙️ ADMIN DASHBOARD</button>
+            
         </div>
 
         <!-- 3. Character Selection -->
@@ -1402,13 +1401,25 @@
         let adminLogoTaps = 0;
         let adminTapTimer = null;
 
-        function handleAdminLogoTap() {
-            adminLogoTaps++;
-            if (adminTapTimer) clearTimeout(adminTapTimer);
-            adminTapTimer = setTimeout(() => { adminLogoTaps = 0; }, 2500);
+        let secretTapCount = 0;
+        let secretTapTimer = null;
+        let lastTapTime = 0;
 
-            if (adminLogoTaps >= 5) {
-                adminLogoTaps = 0;
+        function registerSecretAdminTap(e) {
+            if (e) {
+                e.stopPropagation();
+            }
+            const now = Date.now();
+            // Guard against both touch and synthetic click firing for a single tap
+            if (now - lastTapTime < 100) return;
+            lastTapTime = now;
+
+            secretTapCount++;
+            if (secretTapTimer) clearTimeout(secretTapTimer);
+            secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 3500);
+
+            if (secretTapCount >= 5) {
+                secretTapCount = 0;
                 openAdminConsole();
             }
         }
